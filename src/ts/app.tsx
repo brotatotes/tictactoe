@@ -28,7 +28,7 @@ class App extends React.Component<{}> {
           }}
         >
           <Toolbar>
-            <Typography variant="h2" color="inherit" noWrap>
+            <Typography variant="h3" color="inherit" noWrap>
               tic tac toe
             </Typography>
           </Toolbar>

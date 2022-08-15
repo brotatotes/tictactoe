@@ -1,12 +1,12 @@
 import * as React from 'react';
-import { Paper, Grid, Box, Button, Container } from "@mui/material";
+import { Paper, Grid, Box, Button, Container, Typography } from "@mui/material";
 import CloseIcon from '@mui/icons-material/Close';
 import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
 
 export class TicTacToe extends React.Component<{}> {
   state = {
     tictactoe: new TTTGame(),
-    playerTurn: true,
+    // playerTurn: true,
     winner: TTTPiece.None
   }
 
@@ -26,26 +26,33 @@ export class TicTacToe extends React.Component<{}> {
   }
 
   clickSquare(index: number) {
-    if (this.state.playerTurn && this.state.tictactoe.getPiece(index) === TTTPiece.None) {
+    if (this.state.winner === TTTPiece.None && this.state.tictactoe.getPiece(index) === TTTPiece.None) {
       this.state.tictactoe.setPiece(index, TTTPiece.X)
       let winner = this.state.tictactoe.getWinner()
-      this.setState({ tictactoe: this.state.tictactoe, playerTurn: !this.state.playerTurn, winner: winner })
 
-      console.log(this.state.tictactoe)
-      
-      let botIndex = Math.floor(Math.random() * 9)
-      while (this.state.tictactoe.getPiece(botIndex) === TTTPiece.None) {
-        botIndex = Math.floor(Math.random() * 9)
+      if (winner === TTTPiece.None) {
+        let botIndex = Math.floor(Math.random() * 9)
+        while (this.state.tictactoe.getPiece(botIndex) !== TTTPiece.None) {
+          botIndex = Math.floor(Math.random() * 9)
+        }
+
+        this.state.tictactoe.setPiece(botIndex, TTTPiece.O)
+        winner = this.state.tictactoe.getWinner()
       }
 
-      // console.log(botIndex)
-      // console.log(this.state.tictactoe)
-
-      // this.state.tictactoe.setPiece(botIndex, TTTPiece.O)
-      // winner = this.state.tictactoe.getWinner()
-      // this.setState({ tictactoe: this.state.tictactoe, playerTurn: !this.state.playerTurn, winner: winner })
+      this.setState({ tictactoe: this.state.tictactoe, winner: winner })
     }
   }
+
+  getResultText() {
+    let text = "You " + (this.state.winner === TTTPiece.X ? "Win" : "Lose") + "!"
+    return (
+      this.state.winner !== TTTPiece.None ? <Typography variant="h4" color="inherit" noWrap sx={{ textAlign: 'center', padding: 0 }}>
+          {text}
+        </Typography> : <div/>
+    )
+  }
+  
 
   render() {
     return (
@@ -66,6 +73,7 @@ export class TicTacToe extends React.Component<{}> {
             </Grid>
           </Box>
         </Paper>
+        {this.getResultText()}
       </Container>
     )
   }
