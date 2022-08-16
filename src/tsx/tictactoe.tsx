@@ -1,20 +1,29 @@
 import * as React from 'react';
-import { Paper, Grid, Box, Button, Container, Typography } from "@mui/material";
+import { Paper, Grid, Box, Button, Container, Typography, FormControl, InputLabel, Select, MenuItem } from "@mui/material";
 import CloseIcon from '@mui/icons-material/Close';
 import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
 import ReplayIcon from '@mui/icons-material/Replay';
+import { TicTacToeRandom as TicTacToeBaby } from './TicTacToeRandom';
+import { TicTacToePiece } from './TicTacToeBase';
+import { TicTacToeToddler } from './TicTacToeToddler';
+
+enum Opponent {
+  Baby,
+  Toddler,
+}
 
 export class TicTacToe extends React.Component<{}> {
   state = {
-    tictactoe: new TTTGame(),
-    winner: TTTPiece.None
+    tictactoe: new TicTacToeBaby(),
+    winner: TicTacToePiece.None,
+    nextOpponent: Opponent.Baby
   }
 
-  getSquare(piece: TTTPiece, index: number) {
+  getSquare(piece: TicTacToePiece, index: number) {
     let icon = <div />
-    if (piece === TTTPiece.X) {
+    if (piece === TicTacToePiece.X) {
       icon = <CloseIcon sx={{ fontSize: "85px" }} />
-    } else if (piece === TTTPiece.O) {
+    } else if (piece === TicTacToePiece.O) {
       icon = <RadioButtonUncheckedIcon sx={{ fontSize: "70px" }} />
     }
 
@@ -26,14 +35,13 @@ export class TicTacToe extends React.Component<{}> {
   }
 
   clickSquare(index: number) {
-    if (!this.state.tictactoe.isGameOver() && this.state.tictactoe.getPiece(index) === TTTPiece.None) {
-      this.state.tictactoe.setPiece(index, TTTPiece.X)
+    if (!this.state.tictactoe.isGameOver() && this.state.tictactoe.getPiece(index) === TicTacToePiece.None) {
+      this.state.tictactoe.setPiece(index, TicTacToePiece.X)
       let winner = this.state.tictactoe.getWinner()
 
       if (!this.state.tictactoe.isGameOver()) {
-        // let botMove = this.state.tictactoe.getRandomMove(TTTPiece.O)
-        let botMove = this.state.tictactoe.getBestMove(TTTPiece.O)
-        this.state.tictactoe.setPiece(botMove, TTTPiece.O)
+        let botMove = this.state.tictactoe.getBestMove(TicTacToePiece.O)
+        this.state.tictactoe.setPiece(botMove, TicTacToePiece.O)
         winner = this.state.tictactoe.getWinner()
       }
 
@@ -43,8 +51,8 @@ export class TicTacToe extends React.Component<{}> {
 
   getResultText() {
     let text = "it's a tie 🥲"
-    if (this.state.winner !== TTTPiece.None) {
-      text = (this.state.winner === TTTPiece.X ? "nice job i guess 🙄" : "how did you lose? 🤣")
+    if (this.state.winner !== TicTacToePiece.None) {
+      text = (this.state.winner === TicTacToePiece.X ? "amazing 🙄" : "how did you lose? 🤣")
     }
 
     return (
@@ -54,8 +62,35 @@ export class TicTacToe extends React.Component<{}> {
     )
   }
 
+  getResetButton() {
+    return (
+      <Button disabled={this.state.tictactoe.isBoardEmpty() && this.opponentMatchesGame()} onClick={() => this.resetGame()} sx={{ marginLeft: 10 }}>
+        <ReplayIcon sx={{ fontSize: "50px" }} />
+        {/* <Typography variant="h4" color="inherit" noWrap sx={{ textAlign: 'center' }}>
+          Apply
+        </Typography> */}
+      </Button>
+    )
+  }
+
+  opponentMatchesGame() {
+    return this.state.nextOpponent === Opponent.Baby && this.state.tictactoe instanceof TicTacToeBaby
+      || this.state.nextOpponent === Opponent.Toddler && this.state.tictactoe instanceof TicTacToeToddler
+  }
+
   resetGame() {
-    this.setState({ tictactoe: new TTTGame(), winner: TTTPiece.None })
+    let gameType = TicTacToeBaby
+    if (this.state.nextOpponent === Opponent.Toddler) {
+      gameType = TicTacToeToddler
+    }
+
+    console.log(gameType)
+
+    this.setState({ tictactoe: new gameType(), winner: TicTacToePiece.None })
+  }
+
+  changeOpponent(event) {
+    this.setState({ nextOpponent: event.target.value })
   }
 
   render() {
@@ -77,10 +112,21 @@ export class TicTacToe extends React.Component<{}> {
             </Grid>
           </Box>
         </Paper>
-        <Box textAlign='center' sx={{ minHeight: 100 }}>
-          <Button onClick={() => this.resetGame()}>
-            <ReplayIcon sx={{ fontSize: "50px" }} />
-          </Button>
+        <Box textAlign='center' sx={{ minHeight: 100, p: 5 }}>
+          <FormControl sx={{ minWidth: 150 }}>
+            <InputLabel id="demo-simple-select-label">Opponent</InputLabel>
+            <Select
+              labelId="demo-simple-select-label"
+              id="demo-simple-select"
+              value={this.state.nextOpponent}
+              label="Opponent"
+              onChange={(e) => this.changeOpponent(e)}
+            >
+              <MenuItem value={Opponent.Baby}>baby</MenuItem>
+              <MenuItem value={Opponent.Toddler}>toddler</MenuItem>
+            </Select>
+          </FormControl>
+          {this.getResetButton()}
         </Box>
         <Box textAlign='center' sx={{ minHeight: 80 }}>
           {this.state.tictactoe.isGameOver() ? this.getResultText() : null}
@@ -90,161 +136,3 @@ export class TicTacToe extends React.Component<{}> {
   }
 }
 
-enum TTTPiece {
-  None = 0,
-  X,
-  O,
-}
-
-class TTTGame {
-  private board: TTTPiece[]
-
-  constructor() {
-    this.board = new Array(9).fill(TTTPiece.None)
-  }
-
-  public getBoard() {
-    return this.board
-  }
-
-  public getPiece(index: number) {
-    return this.board[index]
-  }
-
-  public setPiece(index: number, piece: TTTPiece) {
-    this.board[index] = piece
-  }
-
-  public getWinner(): TTTPiece {
-    return this.checkRowWinner() || this.checkColWinner() || this.checkDiagWinner()
-  }
-
-  public isGameOver(): boolean {
-    return this.getWinner() !== TTTPiece.None || this.board.every((p) => p !== TTTPiece.None)
-  }
-
-  public getRandomMove(player: TTTPiece): number {
-    let botIndex = Math.floor(Math.random() * 9)
-    while (this.getPiece(botIndex) !== TTTPiece.None) {
-      botIndex = Math.floor(Math.random() * 9)
-    }
-
-    return botIndex
-  }
-
-  public getBestMove(player: TTTPiece): number {
-    let possibleMoves = [...Array(9).keys()].filter((i) => this.board[i] === TTTPiece.None)
-    let diag1 = [0, 4, 8]
-    let diag2 = [2, 4, 6]
-
-    // Win if possible.
-    for (let move of possibleMoves) {
-      let r = Math.floor(move / 3)
-      let c = move % 3
-
-      let row = [r * 3, r * 3 + 1, r * 3 + 2]
-      let col = [c, c + 3, c + 6]
-
-      if (this.hasTwo(player, row)) {
-        return move
-      }
-
-      if (this.hasTwo(player, col)) {
-        return move
-      }
-
-      if (diag1.includes(move) && this.hasTwo(player, diag1)) {
-        return move
-      }
-
-      if (diag2.includes(move) && this.hasTwo(player, diag2)) {
-        return move
-      }
-    }
-
-    // Block opponent if possible.
-    for (let move of possibleMoves) {
-      let r = Math.floor(move / 3)
-      let c = move % 3
-
-      let row = [r * 3, r * 3 + 1, r * 3 + 2]
-      let col = [c, c + 3, c + 6]
-
-      let otherPlayer = TTTPiece.X
-      if (player === TTTPiece.X) {
-        otherPlayer = TTTPiece.O
-      }
-
-      if (this.hasTwo(otherPlayer, row)) {
-        return move
-      }
-
-      if (this.hasTwo(otherPlayer, col)) {
-        return move
-      }
-
-      if (diag1.includes(move) && this.hasTwo(otherPlayer, diag1)) {
-        return move
-      }
-
-      if (diag2.includes(move) && this.hasTwo(otherPlayer, diag2)) {
-        return move
-      }
-    }
-
-    // No immediate win or block possible. Claim the center if possible.
-    for (let move of possibleMoves) {      
-      if (move === 4) {
-        return move
-      }
-    }
-
-    // No immediate win or block possible. Claim a non-corner if possible.
-    for (let move of possibleMoves) {
-      if ([1, 3, 5, 7].includes(move)) {
-        return move
-      }
-    }
-
-    return possibleMoves[Math.floor(Math.random() * possibleMoves.length)]
-  }
-
-  private hasTwo(player: TTTPiece, arr: number[]): boolean {
-    return arr.filter((i) => this.board[i] === player).length === 2 
-  }
-
-  private checkRowWinner(): TTTPiece {
-    for (let r = 0; r < 3; r++) {
-      let winner = this.checkArrWinner([r * 3, r * 3 + 1, r * 3 + 2])
-      if (winner) {
-        return winner
-      }
-    }
-
-    return TTTPiece.None
-  }
-
-  private checkColWinner(): TTTPiece {
-    for (let c = 0; c < 3; c++) {
-      let winner = this.checkArrWinner([c, c + 3, c + 6])
-      if (winner) {
-        return winner
-      }
-    }
-
-    return TTTPiece.None
-  }
-
-  private checkDiagWinner(): TTTPiece {
-    return this.checkArrWinner([0, 4, 8]) || this.checkArrWinner([2, 4, 6])
-  }
-
-  private checkArrWinner(arr: number[]): TTTPiece {
-    let pieces = arr.map(i => this.board[i])
-    if (pieces.every((v) => v === pieces[0])) {
-      return pieces[0]
-    }
-
-    return TTTPiece.None
-  }
-}

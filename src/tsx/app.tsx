@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { AppBar, Toolbar, Typography } from '@mui/material';
-import { TicTacToe } from './tictactoe';
+import { TicTacToe } from './TicTacToe';
 
 const darkTheme = createTheme({
   palette: {
