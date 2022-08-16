@@ -20,7 +20,7 @@ export class TicTacToe extends React.Component<{}> {
     }
 
     return (
-      <Button fullWidth sx={{ minHeight: 140, textAlign: 'center', }} onClick={(e) => this.clickSquare(index)}>
+      <Button fullWidth sx={{ minHeight: 140, textAlign: 'center', }} onClick={() => this.clickSquare(index)}>
         {icon}
       </Button>
     )
@@ -32,12 +32,8 @@ export class TicTacToe extends React.Component<{}> {
       let winner = this.state.tictactoe.getWinner()
 
       if (!this.state.tictactoe.isGameOver()) {
-        let botIndex = Math.floor(Math.random() * 9)
-        while (this.state.tictactoe.getPiece(botIndex) !== TTTPiece.None) {
-          botIndex = Math.floor(Math.random() * 9)
-        }
-
-        this.state.tictactoe.setPiece(botIndex, TTTPiece.O)
+        let botMove = this.state.tictactoe.getRandomMove(TTTPiece.O)
+        this.state.tictactoe.setPiece(botMove, TTTPiece.O)
         winner = this.state.tictactoe.getWinner()
       }
 
@@ -56,6 +52,10 @@ export class TicTacToe extends React.Component<{}> {
         {text}
       </Typography>
     )
+  }
+
+  resetGame() {
+    this.setState({ tictactoe: new TTTGame(), winner: TTTPiece.None })
   }
 
   render() {
@@ -77,7 +77,14 @@ export class TicTacToe extends React.Component<{}> {
             </Grid>
           </Box>
         </Paper>
-        {this.state.tictactoe.isGameOver() ? this.getResultText() : null}
+        <Box textAlign='center' sx={{ minHeight: 100 }}>
+          <Button onClick={() => this.resetGame()}>
+            <ReplayIcon sx={{ fontSize: "50px" }} />
+          </Button>
+        </Box>
+        <Box textAlign='center' sx={{ minHeight: 80 }}>
+          {this.state.tictactoe.isGameOver() ? this.getResultText() : null}
+        </Box>
       </Container>
     )
   }
@@ -114,6 +121,15 @@ class TTTGame {
 
   public isGameOver(): boolean {
     return this.getWinner() !== TTTPiece.None || this.board.every((p) => p !== TTTPiece.None)
+  }
+
+  public getRandomMove(player: TTTPiece): number {
+    let botIndex = Math.floor(Math.random() * 9)
+    while (this.getPiece(botIndex) !== TTTPiece.None) {
+      botIndex = Math.floor(Math.random() * 9)
+    }
+
+    return botIndex
   }
 
   private checkRowWinner(): TTTPiece {
