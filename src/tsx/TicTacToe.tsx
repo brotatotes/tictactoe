@@ -128,7 +128,7 @@ export class TicTacToe extends React.Component<{}> {
         </Paper>
         <Box>
           <Typography variant="h5" color="inherit" noWrap sx={{ textAlign: 'center' }}>
-            you're playing tic tac toe against a {Opponent[this.state.currentOpponent].toLowerCase()}
+            you're playing tic tac toe against a <Box fontStyle="italic" display='inline'>{Opponent[this.state.currentOpponent].toLowerCase()}</Box>
           </Typography>
         </Box>
         <Box textAlign='center' sx={{ minHeight: 100, p: 5 }}>
