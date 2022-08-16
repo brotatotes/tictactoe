@@ -7,7 +7,6 @@ import ReplayIcon from '@mui/icons-material/Replay';
 export class TicTacToe extends React.Component<{}> {
   state = {
     tictactoe: new TTTGame(),
-    // playerTurn: true,
     winner: TTTPiece.None
   }
 
@@ -32,7 +31,8 @@ export class TicTacToe extends React.Component<{}> {
       let winner = this.state.tictactoe.getWinner()
 
       if (!this.state.tictactoe.isGameOver()) {
-        let botMove = this.state.tictactoe.getRandomMove(TTTPiece.O)
+        // let botMove = this.state.tictactoe.getRandomMove(TTTPiece.O)
+        let botMove = this.state.tictactoe.getBestMove(TTTPiece.O)
         this.state.tictactoe.setPiece(botMove, TTTPiece.O)
         winner = this.state.tictactoe.getWinner()
       }
@@ -130,6 +130,87 @@ class TTTGame {
     }
 
     return botIndex
+  }
+
+  public getBestMove(player: TTTPiece): number {
+    let possibleMoves = [...Array(9).keys()].filter((i) => this.board[i] === TTTPiece.None)
+    let diag1 = [0, 4, 8]
+    let diag2 = [2, 4, 6]
+
+    // Win if possible.
+    for (let move of possibleMoves) {
+      let r = Math.floor(move / 3)
+      let c = move % 3
+
+      let row = [r * 3, r * 3 + 1, r * 3 + 2]
+      let col = [c, c + 3, c + 6]
+
+      if (this.hasTwo(player, row)) {
+        return move
+      }
+
+      if (this.hasTwo(player, col)) {
+        return move
+      }
+
+      if (diag1.includes(move) && this.hasTwo(player, diag1)) {
+        return move
+      }
+
+      if (diag2.includes(move) && this.hasTwo(player, diag2)) {
+        return move
+      }
+    }
+
+    // Block opponent if possible.
+    for (let move of possibleMoves) {
+      let r = Math.floor(move / 3)
+      let c = move % 3
+
+      let row = [r * 3, r * 3 + 1, r * 3 + 2]
+      let col = [c, c + 3, c + 6]
+
+      let otherPlayer = TTTPiece.X
+      if (player === TTTPiece.X) {
+        otherPlayer = TTTPiece.O
+      }
+
+      if (this.hasTwo(otherPlayer, row)) {
+        return move
+      }
+
+      if (this.hasTwo(otherPlayer, col)) {
+        return move
+      }
+
+      if (diag1.includes(move) && this.hasTwo(otherPlayer, diag1)) {
+        return move
+      }
+
+      if (diag2.includes(move) && this.hasTwo(otherPlayer, diag2)) {
+        return move
+      }
+    }
+
+    // No immediate win or block possible. Claim the center if possible.
+    for (let move of possibleMoves) {      
+      if (move === 4) {
+        return move
+      }
+    }
+
+    // No immediate win or block possible. Claim a non-corner if possible.
+    for (let move of possibleMoves) {
+      if ([1, 3, 5, 7].includes(move)) {
+        return move
+      }
+    }
+
+    return possibleMoves[Math.floor(Math.random() * possibleMoves.length)]
+  }
+
+  private hasTwo(player: TTTPiece, arr: number[]): boolean {
+    return arr.filter((i) => this.board[i] === player).length === 2 
   }
 
   private checkRowWinner(): TTTPiece {
