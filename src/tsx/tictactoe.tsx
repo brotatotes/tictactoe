@@ -7,11 +7,15 @@ import { TicTacToeRandom as TicTacToeBaby } from './TicTacToeRandom';
 import { TicTacToePiece } from './TicTacToeBase';
 import { TicTacToeToddler } from './TicTacToeToddler';
 import { TicTacToeLoser } from './TicTacToeLoser';
+import { TicTacToeSimpleton } from './TicTacToeSimpleton';
+import { TicTacToeCheater } from './TicTacToeCheater';
 
 enum Opponent {
   Baby,
   Toddler,
-  Loser
+  Loser,
+  Simpleton,
+  Cheater
 }
 
 export class TicTacToe extends React.Component<{}> {
@@ -79,7 +83,9 @@ export class TicTacToe extends React.Component<{}> {
   opponentMatchesGame() {
     return this.state.nextOpponent === Opponent.Baby && this.state.tictactoe instanceof TicTacToeBaby
       || this.state.nextOpponent === Opponent.Toddler && this.state.tictactoe instanceof TicTacToeToddler
-      ||  this.state.nextOpponent === Opponent.Loser && this.state.tictactoe instanceof TicTacToeLoser
+      || this.state.nextOpponent === Opponent.Loser && this.state.tictactoe instanceof TicTacToeLoser
+      || this.state.nextOpponent === Opponent.Simpleton && this.state.tictactoe instanceof TicTacToeSimpleton
+      || this.state.nextOpponent === Opponent.Cheater && this.state.tictactoe instanceof TicTacToeCheater
   }
 
   resetGame() {
@@ -88,6 +94,10 @@ export class TicTacToe extends React.Component<{}> {
       gameType = TicTacToeToddler
     } else if (this.state.nextOpponent === Opponent.Loser) {
       gameType = TicTacToeLoser
+    } else if (this.state.nextOpponent === Opponent.Simpleton) {
+      gameType = TicTacToeSimpleton
+    } else if (this.state.nextOpponent === Opponent.Cheater) {
+      gameType = TicTacToeCheater
     }
 
     this.setState({ tictactoe: new gameType(), currentOpponent: this.state.nextOpponent, winner: TicTacToePiece.None })
@@ -133,6 +143,8 @@ export class TicTacToe extends React.Component<{}> {
             >
               <MenuItem value={Opponent.Baby}>baby</MenuItem>
               <MenuItem value={Opponent.Toddler}>toddler</MenuItem>
+              <MenuItem value={Opponent.Simpleton}>simpleton</MenuItem>
+              <MenuItem value={Opponent.Cheater}>cheater</MenuItem>
               {/* <MenuItem value={Opponent.Loser}>loser</MenuItem> */}
             </Select>
           </FormControl>
