@@ -2,6 +2,7 @@ import * as React from 'react';
 import { Paper, Grid, Box, Button, Container, Typography } from "@mui/material";
 import CloseIcon from '@mui/icons-material/Close';
 import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
+import ReplayIcon from '@mui/icons-material/Replay';
 
 export class TicTacToe extends React.Component<{}> {
   state = {
@@ -26,11 +27,11 @@ export class TicTacToe extends React.Component<{}> {
   }
 
   clickSquare(index: number) {
-    if (this.state.winner === TTTPiece.None && this.state.tictactoe.getPiece(index) === TTTPiece.None) {
+    if (!this.state.tictactoe.isGameOver() && this.state.tictactoe.getPiece(index) === TTTPiece.None) {
       this.state.tictactoe.setPiece(index, TTTPiece.X)
       let winner = this.state.tictactoe.getWinner()
 
-      if (winner === TTTPiece.None) {
+      if (!this.state.tictactoe.isGameOver()) {
         let botIndex = Math.floor(Math.random() * 9)
         while (this.state.tictactoe.getPiece(botIndex) !== TTTPiece.None) {
           botIndex = Math.floor(Math.random() * 9)
@@ -45,14 +46,17 @@ export class TicTacToe extends React.Component<{}> {
   }
 
   getResultText() {
-    let text = "You " + (this.state.winner === TTTPiece.X ? "Win" : "Lose") + "!"
+    let text = "it's a tie 🥲"
+    if (this.state.winner !== TTTPiece.None) {
+      text = (this.state.winner === TTTPiece.X ? "nice job i guess 🙄" : "how did you lose? 🤣")
+    }
+
     return (
-      this.state.winner !== TTTPiece.None ? <Typography variant="h4" color="inherit" noWrap sx={{ textAlign: 'center', padding: 0 }}>
-          {text}
-        </Typography> : <div/>
+      <Typography variant="h4" color="inherit" noWrap sx={{ textAlign: 'center', padding: 0 }}>
+        {text}
+      </Typography>
     )
   }
-  
 
   render() {
     return (
@@ -73,7 +77,7 @@ export class TicTacToe extends React.Component<{}> {
             </Grid>
           </Box>
         </Paper>
-        {this.getResultText()}
+        {this.state.tictactoe.isGameOver() ? this.getResultText() : null}
       </Container>
     )
   }
@@ -106,6 +110,10 @@ class TTTGame {
 
   public getWinner(): TTTPiece {
     return this.checkRowWinner() || this.checkColWinner() || this.checkDiagWinner()
+  }
+
+  public isGameOver(): boolean {
+    return this.getWinner() !== TTTPiece.None || this.board.every((p) => p !== TTTPiece.None)
   }
 
   private checkRowWinner(): TTTPiece {
