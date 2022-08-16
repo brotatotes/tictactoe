@@ -6,16 +6,19 @@ import ReplayIcon from '@mui/icons-material/Replay';
 import { TicTacToeRandom as TicTacToeBaby } from './TicTacToeRandom';
 import { TicTacToePiece } from './TicTacToeBase';
 import { TicTacToeToddler } from './TicTacToeToddler';
+import { TicTacToeLoser } from './TicTacToeLoser';
 
 enum Opponent {
   Baby,
   Toddler,
+  Loser
 }
 
 export class TicTacToe extends React.Component<{}> {
   state = {
     tictactoe: new TicTacToeBaby(),
     winner: TicTacToePiece.None,
+    currentOpponent: Opponent.Baby,
     nextOpponent: Opponent.Baby
   }
 
@@ -76,17 +79,18 @@ export class TicTacToe extends React.Component<{}> {
   opponentMatchesGame() {
     return this.state.nextOpponent === Opponent.Baby && this.state.tictactoe instanceof TicTacToeBaby
       || this.state.nextOpponent === Opponent.Toddler && this.state.tictactoe instanceof TicTacToeToddler
+      ||  this.state.nextOpponent === Opponent.Loser && this.state.tictactoe instanceof TicTacToeLoser
   }
 
   resetGame() {
     let gameType = TicTacToeBaby
     if (this.state.nextOpponent === Opponent.Toddler) {
       gameType = TicTacToeToddler
+    } else if (this.state.nextOpponent === Opponent.Loser) {
+      gameType = TicTacToeLoser
     }
 
-    console.log(gameType)
-
-    this.setState({ tictactoe: new gameType(), winner: TicTacToePiece.None })
+    this.setState({ tictactoe: new gameType(), currentOpponent: this.state.nextOpponent, winner: TicTacToePiece.None })
   }
 
   changeOpponent(event) {
@@ -112,6 +116,11 @@ export class TicTacToe extends React.Component<{}> {
             </Grid>
           </Box>
         </Paper>
+        <Box>
+          <Typography variant="h5" color="inherit" noWrap sx={{ textAlign: 'center' }}>
+            you're playing tic tac toe against a {Opponent[this.state.currentOpponent].toLowerCase()}
+          </Typography>
+        </Box>
         <Box textAlign='center' sx={{ minHeight: 100, p: 5 }}>
           <FormControl sx={{ minWidth: 150 }}>
             <InputLabel id="demo-simple-select-label">Opponent</InputLabel>
@@ -124,6 +133,7 @@ export class TicTacToe extends React.Component<{}> {
             >
               <MenuItem value={Opponent.Baby}>baby</MenuItem>
               <MenuItem value={Opponent.Toddler}>toddler</MenuItem>
+              {/* <MenuItem value={Opponent.Loser}>loser</MenuItem> */}
             </Select>
           </FormControl>
           {this.getResetButton()}
